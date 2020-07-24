@@ -1,5 +1,9 @@
-story_extractor <- function(URL){
-  read_html(URL) %>% html_nodes('blockquote') %>% html_text() 
+story_extractor <- function(episode_page){
+  episode_page %>% html_nodes('blockquote') %>% html_text() 
+}
+
+episode_name_extractor <- function(episode_page){
+  episode_page %>% html_nodes('.entry-title') %>% html_text() 
 }
 
 label_extractor <- function(URL){
@@ -16,18 +20,12 @@ label_extractor <- function(URL){
 }
 
 
-story_tibble <- function(URL){
-  Sys.sleep(rpois(1, 10))
-  ep_label    <- label_extractor(URL)
-  ep_stories  <- story_extractor(URL)
-  if(episode_counter %% 5L == 0){ 
-    write(paste0(episode_counter, " episodes downloaded."), "") 
-  }
-  episode_counter <<- episode_counter + 1
+story_tibble <- function(episode_page, episode_label){
+  ep_stories  <- story_extractor(episode_page)
   if(length(ep_stories) == 0) {return()}
-  names(ep_stories) <- paste0(ep_label, "_S", 1:length(ep_stories))
+  names(ep_stories) <- paste0(episode_label, "_S", 1:length(ep_stories))
   ep_data <- enframe(ep_stories, name = "story_id", value = "raw_text")
-  ep_data %>% mutate(ep_id = ep_label, 
+  ep_data %>% mutate(ep_id = episode_label, 
                      story_no = 1:length(ep_stories),
                      story_chars = nchar(raw_text), 
                      story_words = str_count(raw_text, '[ \\n]+')+1) %>% 
@@ -59,4 +57,14 @@ story_merger <- function(.data, episode, start_id = 1, end_id = NULL){
     return(.data %>% filter(ep_id != episode | story_no < start_id | story_no > end_id) %>% 
              bind_rows(new_story))
   }
+}
+
+clean_text <- function(text, stopword){
+  tm::removePunctuation(tm::removeNumbers(tm::removeWords(tolower(text), stopword)), 
+                        preserve_intra_word_dashes = TRUE)
+}
+
+episode_namer <- function(page_title){
+  ep_name <- str_match(page_title, "(Avsnitt )?([:print:]*)\\:\\s([:print:]*)")
+  as_tibble(ep_name[, 3:4])
 }

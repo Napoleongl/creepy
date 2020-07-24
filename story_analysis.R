@@ -4,10 +4,21 @@ suppressPackageStartupMessages(require(tidyverse))
 suppressPackageStartupMessages(require(magrittr))
 suppressPackageStartupMessages(require(tm))
 
-load("episodes.Rdata")
+source("story_functions.R")
+load("episode_download.Rdata")
 
 theme_set(theme_minimal(base_family = "serif") +
             theme(panel.grid.minor = element_blank()))
+
+
+episode_names <- episode_namer(episode_titles)
+
+episode_names %<>% mutate(story_count = unlist(sapply(episodes, function(x){ifelse(is.null(nrow(x)),0,nrow(x))})))
+
+
+
+#udsv <- udpipe_download_model(language = "swedish")
+udsv <- udpipe_load_model("swedish-talbanken-ud-2.3-181115.udpipe")
 
 episode_data <- bind_rows(episodes) %>% 
   filter(!str_detect(raw_text, "pic\\.twitter\\.com")) %>% 
@@ -25,11 +36,11 @@ episode_data %<>% story_merger(episode = "E109") %>%
 # https://github.com/peterdalle/svensktext
 stoppord <- unname(unlist(read.csv("stoppord-mycket.csv", stringsAsFactors = FALSE)))
 
-clean_text <- function(text, stopword){
-  tm::removePunctuation(tm::removeNumbers(tm::removeWords(tolower(text), stopword)))
-}
-
 episode_data %<>% mutate(cleaned_text = clean_text(raw_text, stoppord))
+
+ud_test1 <- udpipe(x = episode_data$cleaned_text[233], object = udsv)
+
+ud_test <- udpipe_annotate(udsv, x = episode_data$cleaned_text, doc_id = episode_data$story_id)
 
 episode_data %>% group_by(ep_id) %>% 
   summarise(story_count = n()) %>%  
@@ -42,9 +53,3 @@ ggplot(episode_data) +
   geom_histogram(bins = 12) +
   scale_x_sqrt(breaks =c(125,2500,5000,10000,20000,40000,60000)) 
 
-udsv <- udpipe_download_model(language = "swedish")
-
-ud_test1 <- udpipe(x = episode_data$cleaned_text[1], object = udsv)
-
-tm::stopwords("sv")
-tm::removeWords()
