@@ -61,10 +61,11 @@ story_merger <- function(.data, episode, start_id = 1, end_id = NULL){
 
 clean_text <- function(text, stopword){
   tm::removePunctuation(tm::removeNumbers(tm::removeWords(tolower(text), stopword)), 
-                        preserve_intra_word_dashes = TRUE)
+                        preserve_intra_word_dashes = FALSE)
 }
 
 episode_namer <- function(page_title){
   ep_name <- str_match(page_title, "(Avsnitt )?([:print:]*)\\:\\s([:print:]*)")
   as_tibble(ep_name[, 3:4])
 }
+
