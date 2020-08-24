@@ -24,17 +24,22 @@ udsv <- udpipe_load_model("swedish-talbanken-ud-2.4-190531.udpipe")
 episode_data <- bind_rows(episodes) %>% 
   filter(!str_detect(raw_text, "pic\\.twitter\\.com")) %>% 
   mutate(story_words = as.integer(story_words + 1)) %>%  # Eftersom det görs genom att räkna mellansteg 
-  mutate(raw_text = utf8::as_utf8(raw_text, normalize = TRUE))
-
-
-#IS_DONE
-
-# slå ihop 52_2-52_? till en story (breven i kalvstigsamlingen)
-# slå ihop ep 109 till en story
-# slå ihop 68_2 -68_ till en story (dioneahuset/mailen från Mark)
-episode_data %<>% story_merger(episode = "E109") %>% 
-  story_merger(episode = "E68", start_id = 2) %>% 
-  story_merger(episode = "E52", start_id = 2) 
+  mutate(raw_text = utf8::as_utf8(raw_text, normalize = TRUE)) %>% 
+  story_merger(episode = "E52", start_id = 2) %>% #Kalvstigssamlingen
+  story_merger(episode = "E68", start_id = 2) %>% #Dioneahuset
+  story_merger(episode = "E93", start_id = 2, end_id = 3) %>% # Osbystranden
+  story_merger(episode = "E100:1", start_id = 1) %>% #HOIN
+  story_merger(episode = "E100:2", start_id = 1) %>% #HOIN
+  story_merger(episode = "E100:3", start_id = 1) %>% #HOIN
+  story_merger(episode = "E100:4", start_id = 1) %>% #HOIN
+  story_merger(episode = "E100:5", start_id = 1) %>% #HOIN
+  story_merger(episode = "E109") %>%  #Twitterhistorien
+  story_merger(episode = "E116", start_id = 2, end_id = 4) %>% # Tredelad historia om besökare
+  story_merger(episode = "E116", start_id = 6, end_id = 9) %>% # Cooly om övervakning
+  story_merger(episode = "E118", start_id = 4, end_id = 7) %>% # SCP-106
+  story_merger(episode = "E130", start_id = 3) %>%  #den löånga flygresan i fyra delar
+  filter(story_words > 30) %>% 
+  filter(!(story_id %in% c("E89_S2")))
 
 stoppord <- utf8::as_utf8(unname(unlist(read.csv("stoppord-mycket.csv", stringsAsFactors = FALSE))), normalize = TRUE)
 
