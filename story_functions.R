@@ -124,3 +124,20 @@ LDA_ngram_modeller <- function(data, types, ntopics, ngramtypes = c("NOUN", "ADJ
   FitLdaModel(dtm_clean, k = ntopics, iterations = 2000, burnin = 700, 
                        calc_coherence  = TRUE,calc_r2 = TRUE, calc_likelihood=TRUE)
 }
+
+#Geting mst similar stories into a vector
+matrix_to_named_vector <- function(.x, lower = TRUE){
+  result <- vector(class(.x[1,1]), ncol(.x)*nrow(.x))
+  rnames <- vector("character", ncol(.x)*nrow(.x))
+  if(lower){ .x[!lower.tri(.x)] <- NA }
+  for(i in 1:nrow(.x)){
+    for(j in 1:ncol(.x)){
+      #print(paste(i-1,j,(i-1)*j,))
+      result[((i-1)*ncol(.x))+j] <- .x[i, j]
+      rnames[((i-1)*ncol(.x))+j] <- paste0(rownames(.x)[i],"-",colnames(.x)[j])
+    }
+  }
+  result <- setNames(result, rnames)
+  if(lower) { return(result[!is.na(result)]) }
+  result
+}
