@@ -85,9 +85,9 @@ LDA_modeller <- function(data, types, ntopics){
   dtm <- document_term_matrix(x = dtf)
   ## Remove words which do not occur that much and stop words
   dtm_clean <- dtm_remove_lowfreq(dtm_remove_terms(dtm, terms = stoppord), minfreq = 5)
-  
-  FitLdaModel(dtm_clean, k = ntopics, iterations = 2500, burnin = 1500, 
-              calc_likelihood = TRUE)
+  write(paste("Modelling", paste0(types,collapse = ","),",",ntopics, "topics"),"")
+  FitLdaModel(dtm_clean, k = ntopics, iterations = 2500, burnin = 800, 
+              calc_coherence = TRUE,calc_r2 = TRUE, calc_likelihood=TRUE)
 }
 
 
@@ -120,6 +120,7 @@ LDA_ngram_modeller <- function(data, types, ntopics, ngramtypes = c("NOUN", "ADJ
   dtm <- document_term_frequencies(data, document = "doc_id", term = c("term_type", "mwe"))
   dtm <- document_term_matrix(x = dtm)
   dtm_clean <- dtm_remove_lowfreq(dtm_remove_terms(dtm, terms = stoppord), minfreq = 5)
+  write(paste("Modelling", paste0(types,collapse = ","),",",ntopics, "topics"),"")
   FitLdaModel(dtm_clean, k = ntopics, iterations = 2000, burnin = 700, 
-                       calc_likelihood = TRUE)
+                       calc_coherence  = TRUE,calc_r2 = TRUE, calc_likelihood=TRUE)
 }
