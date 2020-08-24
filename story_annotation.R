@@ -1,3 +1,7 @@
+#Script for annotating (lemmatization, POS-tagging) downloaded stories. Also combines
+#some story-rows in data that come from the same story but are split into multiple 
+#blockquotes. Saves both a cleaned up version and the raw texts.
+
 suppressPackageStartupMessages(require(udpipe))
 suppressPackageStartupMessages(require(stringr))
 suppressPackageStartupMessages(require(tidyverse))
@@ -14,8 +18,7 @@ episode_names <- episode_namer(episode_titles)
 
 episode_names %<>% mutate(story_count = unlist(sapply(episodes, function(x){ifelse(is.null(nrow(x)),0,nrow(x))})))
 
-#udsv <- udpipe_download_model(language = "swedish")
-#udsv <- udpipe_load_model("swedish-talbanken-ud-2.3-181115.udpipe")
+#udsv <- udpipe_download_model(language = "swedish") #uncomment to download latest annotation model
 udsv <- udpipe_load_model("swedish-talbanken-ud-2.4-190531.udpipe")
 
 episode_data <- bind_rows(episodes) %>% 
@@ -36,7 +39,7 @@ episode_data %<>% story_merger(episode = "E109") %>%
 stoppord <- utf8::as_utf8(unname(unlist(read.csv("stoppord-mycket.csv", stringsAsFactors = FALSE))), normalize = TRUE)
 
 episode_data %<>% mutate(cleaned_text = clean_text(raw_text, stoppord),
-                         raw_text = str_remove_all(raw_text, "[“”‘’…´]") ) 
+                         raw_text = utf8::as_utf8(str_remove_all(raw_text, "[“”‘’…´]"),TRUE)) 
 
 ud_raw <- udpipe_annotate(udsv, parallel.cores = 3L,
                            x = episode_data$raw_text, 

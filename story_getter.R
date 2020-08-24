@@ -1,3 +1,8 @@
+#Script that downloads episodes from creepypasta.se, extracts each separate story
+#(by blockquote-tag) and saves it to a data.frame with one row per story. 
+#Can be restarted to download new stories or if it was abrubted. 
+#Implements a 10 second (roughly) pause between each pageview to honor scraping reqs.
+
 suppressPackageStartupMessages(require(rvest))
 suppressPackageStartupMessages(require(stringr))
 suppressPackageStartupMessages(require(tidyverse))
