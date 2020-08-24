@@ -17,7 +17,7 @@ ggsave(filename = "images/story_words_dist.pdf", width = 11, height =4, units ="
 ggplot(episode_data) +
   aes(x=story_words) +
   geom_histogram(bins = 12, fill = word_type_colours[1], colour = word_type_colours[length(word_type_colours)]) +
-  scale_x_sqrt("Number of words", breaks =c(150,2000,5000,10000,20000,40000,60000)) +
+  scale_x_sqrt("Number of words", breaks =c(250,2000,5000,10000,20000,40000,60000)) +
   labs(y = "Number of stories", title = "Distribution of story length in number of words")
 )
 
