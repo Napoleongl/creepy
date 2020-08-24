@@ -9,8 +9,8 @@ suppressPackageStartupMessages(require(textmineR))
 
 source("story_functions.R")
 load(file = "annotated_text.RData")
-set.seed(1)
-ntopics       <- seq.int(from = 4, to = 32, by = 2)
+set.seed(123)
+ntopics       <- seq.int(from = 4, to = 28, by = 2)
 
 topic_data    <- expand_grid(ntopics = ntopics,
                              types = list(c("NOUN"),c("ADJ", "NOUN"),c("VERB", "NOUN"),
