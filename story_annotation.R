@@ -14,11 +14,6 @@ suppressPackageStartupMessages(require(textmineR))
 source("story_functions.R")
 load("episode_download.Rdata")
 
-#episode_names <- episode_namer(episode_titles)
-
-#episode_names %<>% mutate(story_count = episode_data %>% group_by(ep_id) %>% summarize(n())
-
-#udsv <- udpipe_download_model(language = "swedish") #uncomment to download latest annotation model
 udsv <- udpipe_load_model("swedish-talbanken-ud-2.4-190531.udpipe")
 
 # Cleaning out duplicate stories, and merging multi-blockquote-stories
@@ -48,8 +43,8 @@ stoppord <- utf8::as_utf8(unname(unlist(read.csv("stoppord-mycket.csv",
                                                  stringsAsFactors = FALSE))), 
                           normalize = TRUE)
 
-episode_data %<>% mutate(#cleaned_text = clean_text(raw_text, stoppord),
-                         raw_text = utf8::as_utf8(str_remove_all(raw_text, "[“”‘’…´]"),TRUE)) 
+episode_data %<>% mutate(raw_text = utf8::as_utf8(str_remove_all(raw_text, "[“”‘’…´]"),TRUE)) 
+
 story_word_graph()
 
 ud_raw <- udpipe_annotate(udsv, parallel.cores = 3L,
@@ -57,11 +52,5 @@ ud_raw <- udpipe_annotate(udsv, parallel.cores = 3L,
                            doc_id = episode_data$story_id)
 ud_raw <- as.data.frame(ud_raw)
 ud_raw$topic_level_id <- unique_identifier(ud_raw, fields = c("doc_id", "paragraph_id", "sentence_id"))
-# Since only raw texts are used, removing the annotations of cleaned ones.
-# ud_clean <- udpipe_annotate(udsv, parallel.cores = 3L,
-#                           x = episode_data$cleaned_text, 
-#                           doc_id = episode_data$story_id)
-# ud_clean <- as.data.frame(ud_clean)
-# ud_clean$topic_level_id <- unique_identifier(ud_clean, fields = c("doc_id", "paragraph_id", "sentence_id"))
 
 save(ud_raw, file = "annotated_text.RData")
