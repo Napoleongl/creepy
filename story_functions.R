@@ -126,10 +126,10 @@ LDA_ngram_modeller <- function(data, types, ntopics, ngramtypes = c("NOUN", "ADJ
 }
 
 #Geting mst similar stories into a vector
-matrix_to_named_vector <- function(.x, lower = TRUE){
+matrix_to_named_vector <- function(.x, upper = TRUE){
   result <- vector(class(.x[1,1]), ncol(.x)*nrow(.x))
   rnames <- vector("character", ncol(.x)*nrow(.x))
-  if(lower){ .x[!lower.tri(.x)] <- NA }
+  if(upper){ .x[!upper.tri(.x)] <- NA }
   for(i in 1:nrow(.x)){
     for(j in 1:ncol(.x)){
       #print(paste(i-1,j,(i-1)*j,))
@@ -138,6 +138,15 @@ matrix_to_named_vector <- function(.x, lower = TRUE){
     }
   }
   result <- setNames(result, rnames)
-  if(lower) { return(result[!is.na(result)]) }
+  if(upper) { return(result[!is.na(result)]) }
   result
+}
+
+
+#Sample of least similar 
+story_pair <- function(story_pair_string){
+  stories <- unlist(str_split(story_pair_string, "-"))
+  episode_data %>% filter(story_id %in% stories) %>% 
+    mutate(text = str_sub(raw_text,1,350)) %>% 
+    select(text) %>% xtable()
 }
