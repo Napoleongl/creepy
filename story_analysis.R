@@ -1,13 +1,16 @@
+suppressPackageStartupMessages(require(tidyverse))
 suppressPackageStartupMessages(require(udpipe))
 suppressPackageStartupMessages(require(stringr))
-suppressPackageStartupMessages(require(tidyverse))
 suppressPackageStartupMessages(require(magrittr))
 suppressPackageStartupMessages(require(tm))
 suppressPackageStartupMessages(require(topicmodels))
 suppressPackageStartupMessages(require(parallel))
 suppressPackageStartupMessages(require(textmineR))
+suppressPackageStartupMessages(require(xtable))
 
 source("story_functions.R")
+source("story_graphs.R")
+
 load("LDA_raw_models.RData")
 load("LDA_bigram_models.RData")
 
@@ -27,15 +30,39 @@ best_model_idx <- which.max(model_data$mean_coh)
 for(model_id in 1:length(models)){
   models[[model_id]]$top_topics <- GetTopTerms(models[[model_id]]$phi, 6)
   models[[model_id]]$prevalence <- colSums(models[[model_id]]$theta)/sum(models[[model_id]]$theta)*100
-  }
+}
 
-str(models[[best_model_idx]])
-#plot(hclust(as.dist(CalcHellingerDist(models[[best_model_idx]]$phi)),method = "complete"))
+model_comp_graph()
 
-
-models[[18]]$top_terms <- GetTopTerms(models[[18]]$phi, 6)
-models[[18]]$prevalence <- colSums(models[[18]]$theta)/sum(models[[18]]$theta)*100
-#models[[best_model_idx]]$prevalence
+best_model_graph()
 
 
+story_similarity <-lsa::cosine(t(models[[best_model_idx]]$theta)) 
+  story_similarity %>%  matrix_to_named_vector() %>% 
+    enframe("stories", "similarity") -> similarity_df
 
+story_outliers <- colSums(story_similarity) %>% enframe("story", "similarity_sum") %>% 
+  arrange((similarity_sum))
+  
+#Least/Most Similar
+similarity_df %>% 
+  arrange(desc(similarity)) %>% 
+  head(10) %>% 
+  xtable(digits=4) %>% 
+  print(include.rownames=FALSE)
+
+similarity_df %>% 
+  arrange((similarity)) %>% 
+  head(10) %>% 
+  xtable(digits=4) %>% 
+  print(include.rownames=FALSE)
+
+#Story Clustering
+story_clust <- hclust(as.dist(1-story_similarity), method = "ward.D2")
+story_dendro <- as.dendrogram(story_clust)
+story_dendrogram <- ggdendrogram(story_dendro, rotate=TRUE) 
+
+load(file="episode_data.RData")
+
+
+story_pair("E11_S3-E13_S1")
