@@ -38,7 +38,7 @@ episode_data <- bind_rows(episodes) %>%
   filter(story_words > 30) %>% 
   filter(!(story_id %in% c("E89_S2", "E67_S8"))) #Mailsvar samt dublett
 write(paste(nrow(episode_data),"episodes to annotate."),"")
-
+save(episode_data, file="episode_data.RData")
 stoppord <- utf8::as_utf8(unname(unlist(read.csv("stoppord-mycket.csv", 
                                                  stringsAsFactors = FALSE))), 
                           normalize = TRUE)

@@ -9,7 +9,7 @@ suppressPackageStartupMessages(require(textmineR))
 
 source("story_functions.R")
 load(file = "annotated_text.RData")
-set.seed(123)
+set.seed(1111)
 ntopics       <- seq.int(from = 4, to = 28, by = 2)
 
 topic_data    <- expand_grid(ntopics = ntopics,
