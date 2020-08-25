@@ -16,7 +16,7 @@ load("episode_download.Rdata")
 
 #episode_names <- episode_namer(episode_titles)
 
-#episode_names %<>% mutate(story_count = unlist(sapply(episodes, function(x){ifelse(is.null(nrow(x)),0,nrow(x))})))
+#episode_names %<>% mutate(story_count = episode_data %>% group_by(ep_id) %>% summarize(n())
 
 #udsv <- udpipe_download_model(language = "swedish") #uncomment to download latest annotation model
 udsv <- udpipe_load_model("swedish-talbanken-ud-2.4-190531.udpipe")
@@ -28,6 +28,7 @@ episode_data <- bind_rows(episodes) %>%
   mutate(raw_text = utf8::as_utf8(raw_text, normalize = TRUE)) %>% 
   story_merger(episode = "E52", start_id = 2) %>% #Kalvstigssamlingen
   story_merger(episode = "E68", start_id = 2) %>% #Dioneahuset
+  story_merger(episode = "E80") %>% #luckan på vinden
   story_merger(episode = "E93", start_id = 2, end_id = 3) %>% # Osbystranden
   story_merger(episode = "E100:1", start_id = 1) %>% #HOIN
   story_merger(episode = "E100:2", start_id = 1) %>% #HOIN
@@ -41,11 +42,15 @@ episode_data <- bind_rows(episodes) %>%
   story_merger(episode = "E130", start_id = 3) %>%  #den löånga flygresan i fyra delar
   filter(story_words > 30) %>% 
   filter(!(story_id %in% c("E89_S2", "E67_S8"))) #Mailsvar samt dublett
+write(paste(nrow(episode_data),"episodes to annotate."),"")
 
-stoppord <- utf8::as_utf8(unname(unlist(read.csv("stoppord-mycket.csv", stringsAsFactors = FALSE))), normalize = TRUE)
+stoppord <- utf8::as_utf8(unname(unlist(read.csv("stoppord-mycket.csv", 
+                                                 stringsAsFactors = FALSE))), 
+                          normalize = TRUE)
 
 episode_data %<>% mutate(#cleaned_text = clean_text(raw_text, stoppord),
                          raw_text = utf8::as_utf8(str_remove_all(raw_text, "[“”‘’…´]"),TRUE)) 
+story_word_graph()
 
 ud_raw <- udpipe_annotate(udsv, parallel.cores = 3L,
                            x = episode_data$raw_text, 
