@@ -13,4 +13,4 @@ The code is organised into a number of scripts designed to be run in sequence, a
 
 The files **story_functions.R** and  **story_graphs.R** contains various helper functions created to ensure that the modelling-files are kept somewhat clean and readable.
 
-The abstract of the project report is found [here]()
+The abstract of the project report is found [here](https://github.com/Napoleongl/creepy/blob/master/abstract.txt).
